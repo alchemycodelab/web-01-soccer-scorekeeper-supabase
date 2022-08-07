@@ -17,7 +17,7 @@ export async function createGame(game) {
 }
 
 export async function getGames() {
-    const response = await client.from('games').select().match({ user_id: client.auth.user().id });
+    const response = await client.from('games').select();
 
     return checkError(response);
 }
