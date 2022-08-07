@@ -1,38 +1,122 @@
-import { 
-    redirectToGames, 
-    signInUser, 
-    signupUser,
-} from './fetch-utils.js';
+import { getGames, createGame } from '../fetch-utils.js';
+import { renderGame } from '../render-utils.js';
+// import functions and grab DOM elements
+const currentGameEl = document.getElementById('current-game-container');
+const pastGamesEl = document.getElementById('past-games-container');
 
-const signInForm = document.getElementById('sign-in');
-const signInEmail = document.getElementById('sign-in-email');
-const signInPassword = document.getElementById('sign-in-password');
+const nameForm = document.getElementById('name-form');
+const teamOneAddButton = document.getElementById('team-one-add-button');
+const teamTwoAddButton = document.getElementById('team-two-add-button');
+const teamOneSubtractButton = document.getElementById('team-one-subtract-button');
+const teamTwoSubtractButton = document.getElementById('team-two-subtract-button');
+const finishGameButton = document.getElementById('finish-game-button');
+const teamOneLabel = document.getElementById('team-one-name');
+const teamTwoLabel = document.getElementById('team-two-name');
 
-const signUpForm = document.getElementById('sign-up');
-const signUpEmail = document.getElementById('sign-up-email');
-const signUpPassword = document.getElementById('sign-up-password');
+let pastGames = [];
 
-// if user currently logged in, redirect
-redirectToGames();
+let currentGame = {
+    name1: '',
+    name2: '',
+    score1: 0,
+    score2: 0,
+};
 
-signUpForm.addEventListener('submit', async(event)=>{
-    event.preventDefault();
-    const user = await signupUser(signUpEmail.value, signUpPassword.value);
+// set event listeners
+// get user input
+// use user input to update state
+// update DOM to reflect the new state
 
-    if (user){
-        redirectToGames();
-    } else {
-        console.error(user);
-    }
+nameForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(nameForm);
+
+    const name1 = formData.get('team-one');
+    const name2 = formData.get('team-two');
+
+    currentGame.name1 = name1;
+    currentGame.name2 = name2;
+
+    nameForm.reset();
+    displayCurrentGameEl();
 });
 
-signInForm.addEventListener('submit', async(event)=>{
-    event.preventDefault();
-    const user = await signInUser(signInEmail.value, signInPassword.value);
-    
-    if (user){
-        redirectToGames();
-    } else {
-        console.error(user);
+teamOneAddButton.addEventListener('click', () => {
+    currentGame.score1++;
+
+    displayCurrentGameEl();
+});
+
+teamTwoAddButton.addEventListener('click', () => {
+    currentGame.score2++;
+
+    displayCurrentGameEl();
+});
+
+teamOneSubtractButton.addEventListener('click', () => {
+    currentGame.score1--;
+
+    displayCurrentGameEl();
+});
+
+teamTwoSubtractButton.addEventListener('click', () => {
+    currentGame.score2--;
+    displayCurrentGameEl();
+});
+
+function displayCurrentGameEl() {
+    currentGameEl.textContent = '';
+
+    teamOneLabel.textContent = currentGame.name1;
+    teamTwoLabel.textContent = currentGame.name2;
+
+    const gameEl = renderGame(currentGame);
+
+    gameEl.classList.add('current');
+
+    currentGameEl.append(gameEl);
+}
+
+function displayAllGames() {
+    pastGamesEl.textContent = '';
+
+    for (let game of pastGames) {
+        const gameEl = renderGame(game);
+
+        gameEl.classList.add('past');
+
+        pastGamesEl.append(gameEl);
+    }
+}
+
+finishGameButton.addEventListener('click', async () => {
+    await createGame(currentGame);
+
+    const games = await getGames();
+
+    pastGames = games;
+
+    displayAllGames();
+
+    currentGame = {
+        name1: '',
+        name2: '',
+        score1: 0,
+        score2: 0,
+    };
+
+    displayCurrentGameEl();
+});
+
+displayCurrentGameEl();
+
+window.addEventListener('load', async () => {
+    const games = await getGames();
+
+    if (games) {
+        pastGames = games;
+
+        displayAllGames();
     }
 });
