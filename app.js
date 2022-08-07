@@ -1,5 +1,5 @@
-import { getGames, createGame } from '../fetch-utils.js';
-import { renderGame } from '../render-utils.js';
+import { getGames, createGame } from './fetch-utils.js';
+import { renderGame } from './render-utils.js';
 // import functions and grab DOM elements
 const currentGameEl = document.getElementById('current-game-container');
 const pastGamesEl = document.getElementById('past-games-container');
